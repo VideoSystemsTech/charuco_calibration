@@ -140,6 +140,7 @@ int main(int argc, char *argv[]) {
     auto sub = it.subscribe("image", 1, imageCallback /*, hints */);
     ROS_INFO("Advertising charuco board image");
     auto pub = nhPriv.advertise<sensor_msgs::Image>("board", 1, true);
+    auto out_pub = nhPriv.advertise<sensor_msgs::Image>("out", 1, true);
 
     int boardImgWidth = nhPriv.param("board_image_width", 1536);
     int boardImgHeight = nhPriv.param("board_image_height", 2048);
@@ -173,6 +174,12 @@ int main(int argc, char *argv[]) {
                 Point(10, 20), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(255, 0, 0), 2);
 
         imshow("out", displayedImage);
+
+        cv_bridge::CvImage outImgBridge;
+        outImgBridge.image = displayedImage;
+        outImgBridge.encoding = sensor_msgs::image_encodings::BGR8;
+        out_pub.publish(outImgBridge.toImageMsg());
+
         char key = (char)waitKey(waitTime);
         if(key == 27) break;
         if(key == 'c') {
